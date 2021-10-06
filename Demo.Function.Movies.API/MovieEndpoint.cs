@@ -23,7 +23,18 @@ namespace Demo.Function.Movies.API
         }
 
         [FunctionName("MovieGetTopEndpoint")]
-        public async Task<IActionResult> GetAll([HttpTrigger(AuthorizationLevel.Function, "get", Route = "recommendations/top")] HttpRequest req, ILogger log, ExecutionContext context)
+        public async Task<IActionResult> GetTop([HttpTrigger(AuthorizationLevel.Function, "get", Route = "recommendations/top")] HttpRequest req, ILogger log, ExecutionContext context)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var queryService = new MovieQueryService(_cosmosClient);
+            var listing = await queryService.GetAll();
+
+            return new OkObjectResult(listing);
+        }
+
+        [FunctionName("MovieGetAllEndpoint")]
+        public async Task<IActionResult> GetAll([HttpTrigger(AuthorizationLevel.Function, "get", Route = "movies")] HttpRequest req, ILogger log, ExecutionContext context)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
