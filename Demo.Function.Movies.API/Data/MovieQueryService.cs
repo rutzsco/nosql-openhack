@@ -41,6 +41,27 @@ namespace Demo.Function.Movies.Api.Data
             return qr;
         }
 
+        public async Task<QueryResult<IEnumerable<Movie>>> GetAllByCategory(string category)
+        {
+            var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
+            QueryDefinition query = new QueryDefinition("SELECT * FROM C WHERE C.CategoryId = @category"); 
+            query.WithParameter("@category", Convert.ToInt32(category));
+
+            List<Movie> results = new List<Movie>();
+            double requestCharge = 0;
+            using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query))
+            {
+                while (resultSetIterator.HasMoreResults)
+                {
+                    Microsoft.Azure.Cosmos.FeedResponse<Movie> response = await resultSetIterator.ReadNextAsync();
+                    requestCharge = requestCharge + response.RequestCharge;
+                    results.AddRange(response);
+                }
+            }
+            var qr = new QueryResult<IEnumerable<Movie>>(results, requestCharge);
+            return qr;
+        }
+
         public async Task<QueryResult<IEnumerable<Category>>> GetCategories()
         {
             var container = this._cosmosClient.GetContainer(DatabaseName, "Category");

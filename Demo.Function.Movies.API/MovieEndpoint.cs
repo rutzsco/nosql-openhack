@@ -44,6 +44,17 @@ namespace Demo.Function.Movies.API
             return new OkObjectResult(listing);
         }
 
+        [FunctionName("MovieGetAllByCategoryEndpoint")]
+        public async Task<IActionResult> GetAllByCategory([HttpTrigger(AuthorizationLevel.Function, "get", Route = "moviesbycategory/{id}")] HttpRequest req, string id, ILogger log, ExecutionContext context)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var queryService = new MovieQueryService(_cosmosClient);
+            var listing = await queryService.GetAllByCategory(id);
+
+            return new OkObjectResult(listing);
+        }
+
         [FunctionName("MovieGetEndpoint")]
         public async Task<IActionResult> Get([HttpTrigger(AuthorizationLevel.Function, "get", Route = "movies/{id}")] HttpRequest req, string id, ILogger log, ExecutionContext context)
         {
