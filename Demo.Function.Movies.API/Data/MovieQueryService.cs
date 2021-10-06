@@ -147,5 +147,14 @@ namespace Demo.Function.Movies.Api.Data
             var qr = new QueryResult<Movie>(result, result.RequestCharge);
             return qr;
         }
+
+        public async Task<QueryResult<Order>> OrderById(string id)
+        {
+            var container = this._cosmosClient.GetContainer(DatabaseName, "Orders");
+            var result = await container.ReadItemAsync<Order>(id, new PartitionKey(Convert.ToInt32(id)));
+
+            var qr = new QueryResult<Order>(result, result.RequestCharge);
+            return qr;
+        }
     }
 }

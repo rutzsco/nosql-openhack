@@ -88,6 +88,17 @@ namespace Demo.Function.Movies.API
             return new OkObjectResult(listing);
         }
 
+        [FunctionName("OrderGetEndpoint")]
+        public async Task<IActionResult> OrderGet([HttpTrigger(AuthorizationLevel.Function, "get", Route = "order/{id}")] HttpRequest req, string id, ILogger log, ExecutionContext context)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var queryService = new MovieQueryService(_cosmosClient);
+            var listing = await queryService.OrderById(id);
+
+            return new OkObjectResult(listing);
+        }
+
         [FunctionName("CreateCartItemEndpoint")]
         public async Task<IActionResult> CreateCartItem([HttpTrigger(AuthorizationLevel.Function, "get", Route = "cart/{id}/item/{itemId}")] HttpRequest req, string id, string itemId, ILogger log, ExecutionContext context)
         {

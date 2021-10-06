@@ -12,4 +12,10 @@ namespace Demo.Function.Movies.API.Data
 
         public string Description { get; set; }
     }
+
+    public class Order
+    {
+        public int id { get; set; }
+
+    }
 }
