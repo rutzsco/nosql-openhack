@@ -37,6 +37,23 @@ namespace Demo.Function.Movies.Api.Data
             }
             return results;
         }
+
+        public async Task<IEnumerable<Movie>> GetCategories()
+        {
+            var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
+            QueryDefinition query = new QueryDefinition("SELECT * FROM C");
+            List<Movie> results = new List<Movie>();
+            using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query))
+            {
+                while (resultSetIterator.HasMoreResults)
+                {
+                    Microsoft.Azure.Cosmos.FeedResponse<Movie> response = await resultSetIterator.ReadNextAsync();
+                    results.AddRange(response);
+                }
+            }
+            return results;
+        }
+
         public async Task<Movie> GetById(string id)
         {
             var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
