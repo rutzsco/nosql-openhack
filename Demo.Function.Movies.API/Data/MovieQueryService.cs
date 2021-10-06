@@ -142,11 +142,11 @@ namespace Demo.Function.Movies.Api.Data
 
         public async Task<double> CreateOrder()
         {
-            var od1 = new OrderDetail("6851", "397520", "13.13", "1", "ezlzih41@esfhmo.net");
-            var od2 = new OrderDetail("6861", "397521", "13.13", "1", "ezlzih41@esfhmo.net");
+            //var od1 = new OrderDetail("6851", "397520", "13.13", "1", "ezlzih41@esfhmo.net");
+           // var od2 = new OrderDetail("6861", "397521", "13.13", "1", "ezlzih41@esfhmo.net");
             var odList = new List<OrderDetail>();
-            odList.Add(od1);
-            odList.Add(od2);
+            odList.Add(null);
+            odList.Add(null);
 
             var id = Guid.NewGuid().ToString();
             var o = new
