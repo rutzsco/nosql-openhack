@@ -109,5 +109,16 @@ namespace Demo.Function.Movies.API
 
             return new OkObjectResult(r);
         }
+
+        [FunctionName("CreateOrderEndpoint")]
+        public async Task<IActionResult> CreateOrder([HttpTrigger(AuthorizationLevel.Function, "get", Route = "createorder/{id}")] HttpRequest req, ILogger log, string id, ExecutionContext context)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var queryService = new MovieQueryService(_cosmosClient);
+            var r = await queryService.CreateOrder();
+
+            return new OkObjectResult(r);
+        }
     }
 }

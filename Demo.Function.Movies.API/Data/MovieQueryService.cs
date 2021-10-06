@@ -66,7 +66,8 @@ namespace Demo.Function.Movies.Api.Data
             QueryDefinition query = new QueryDefinition("SELECT * FROM C");
             List<Movie> results = new List<Movie>();
             double requestCharge = 0;
-            using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query))
+            QueryRequestOptions options = new QueryRequestOptions() { MaxItemCount = 10 };
+            using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query, requestOptions: options))
             {
                 while (resultSetIterator.HasMoreResults)
                 {
@@ -135,6 +136,41 @@ namespace Demo.Function.Movies.Api.Data
             };
             var container = this._cosmosClient.GetContainer(DatabaseName, "CartItem");
             var response = await container.CreateItemAsync(ci, new PartitionKey(id));
+
+            return response.RequestCharge;
+        }
+
+        public async Task<double> CreateOrder()
+        {
+            var od1 = new OrderDetail("6851", "397520", "13.13", "1", "ezlzih41@esfhmo.net");
+            var od2 = new OrderDetail("6861", "397521", "13.13", "1", "ezlzih41@esfhmo.net");
+            var odList = new List<OrderDetail>();
+            odList.Add(od1);
+            odList.Add(od2);
+
+            var id = Guid.NewGuid().ToString();
+            var o = new
+            {
+                id = "471",
+                OrderId = 471,
+                OrderDate = "2018-10-09T00:28:22.750",
+    FirstName = "Ben",
+    LastName = "Reed",
+    Address = "63 White Oak St.",
+    City = "Stockton",
+    State = "California",
+   PostalCode = "29151",
+    Country = "United States",
+    Phone = "430871-1517",
+    Total = 89.41,
+    SMSOptIn = true,
+    PaymentTransactionId = "DIG84594",
+    HasBeenShipped = false,
+    OrderDetails = odList
+            };
+
+            var container = this._cosmosClient.GetContainer(DatabaseName, "Orders");
+            var response = await container.CreateItemAsync(o, new PartitionKey(o.OrderId));
 
             return response.RequestCharge;
         }
