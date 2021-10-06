@@ -64,7 +64,7 @@ namespace Demo.Function.Movies.Api.Data
         public async Task<QueryResult<Movie>> GetById(string id)
         {
             var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
-            var result = await container.ReadItemAsync<Movie>(id, new PartitionKey(id));
+            var result = await container.ReadItemAsync<Movie>(id, new PartitionKey(Convert.ToInt32(id)));
 
             var qr = new QueryResult<Movie>(result, result.RequestCharge);
             return qr;
