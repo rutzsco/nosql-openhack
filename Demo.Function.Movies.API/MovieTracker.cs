@@ -34,23 +34,21 @@ namespace Demo.Function.Movies.API
         [JsonProperty("buyCount")]
         public long BuyCount { get; set; }
 
-        [JsonProperty("buyCount")]
-        public DateTime OrderDate { get; set; }
-
         public void ProcessNewOrderDetail(OrderDetail order)
         {
             _Logger.LogInformation($"ProcessNewOrder - Begin Processing. Id {order.ProductId}");
             BuyCount = BuyCount + Convert.ToInt32(order.Quantity);
 
-            var now = DateTime.UtcNow;
             var m = new
             {
-                id = order.ProductId,
+                id = $"{Convert.ToString(order.ProductId)}-{order.OrderDate.Year}-{order.OrderDate.Month}-{order.OrderDate.Day}-{order.OrderDate.Hour}",
+                productId = Convert.ToString(order.ProductId),
                 buyCount = BuyCount,
-                dateTime = new DateTime(DateTime.UtcNow.Year, now.Month, now.Day, now.Hour, 0, 0)
+                type = "ProductBuyCount",
+                dateTime = new DateTime(order.OrderDate.Year, order.OrderDate.Month, order.OrderDate.Day, order.OrderDate.Hour, 0, 0)
             };
             var container = _cosmosClient.GetContainer("MoviesDB", "MovieStatistics");
-            var response =  container.CreateItemAsync(m, new PartitionKey(m.id)).Result;
+            container.UpsertItemAsync(m, new PartitionKey(m.id)).Wait();
         }
 
         public Task Reset()
@@ -69,7 +67,7 @@ namespace Demo.Function.Movies.API
             Entity.Current.DeleteState();
         }
 
-        [FunctionName("MovieTracker")]
+        [FunctionName("MovieTracker3")]
         public static Task Run([EntityTrigger] IDurableEntityContext ctx, ExecutionContext executionContext, ILogger logger)
             => ctx.DispatchAsync<MovieTracker>(executionContext, logger);
     }

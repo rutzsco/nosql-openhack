@@ -46,5 +46,7 @@ namespace Demo.Function.Movies.API.Data
 
         public string Email { get; set; }
 
+        public DateTime OrderDate { get; set; }
+
     }
 }

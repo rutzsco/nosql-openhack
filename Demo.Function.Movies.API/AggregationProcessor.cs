@@ -29,7 +29,10 @@ namespace Demo.Function.Movies.API
 
                 foreach (var orderDetail in order.Details)
                 {
-                    var entityId = new EntityId("MovieTracker", orderDetail.ProductId.ToString());
+                    orderDetail.OrderDate = order.OrderDate;
+
+
+                    var entityId = new EntityId("MovieTracker3", $"{Convert.ToString(orderDetail.ProductId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}-{orderDetail.OrderDate.Hour}");
                     await context.SignalEntityAsync(entityId, "ProcessNewOrderDetail", orderDetail);
                 }
             }
