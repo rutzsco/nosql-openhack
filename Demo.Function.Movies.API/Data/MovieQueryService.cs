@@ -22,43 +22,52 @@ namespace Demo.Function.Movies.Api.Data
             _cosmosClient = cosmosClient;
         }
 
-        public async Task<IEnumerable<Movie>> GetAll()
+        public async Task<QueryResult<IEnumerable<Movie>>> GetAll()
         {
             var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
             QueryDefinition query = new QueryDefinition("SELECT * FROM C");
             List<Movie> results = new List<Movie>();
+            double requestCharge = 0;
             using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query))
             {
                 while (resultSetIterator.HasMoreResults)
                 {
                     Microsoft.Azure.Cosmos.FeedResponse<Movie> response = await resultSetIterator.ReadNextAsync();
+                    requestCharge = requestCharge + response.RequestCharge;
                     results.AddRange(response);
                 }
             }
-            return results;
+            var qr = new QueryResult<IEnumerable<Movie>>(results, requestCharge);
+            return qr;
         }
 
-        public async Task<IEnumerable<Movie>> GetCategories()
+        public async Task<QueryResult<IEnumerable<Category>>> GetCategories()
         {
-            var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
+            var container = this._cosmosClient.GetContainer(DatabaseName, "Category");
             QueryDefinition query = new QueryDefinition("SELECT * FROM C");
-            List<Movie> results = new List<Movie>();
-            using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query))
+            List<Category> results = new List<Category>();
+            double requestCharge = 0;
+            using (FeedIterator<Category> resultSetIterator = container.GetItemQueryIterator<Category>(query))
             {
                 while (resultSetIterator.HasMoreResults)
                 {
-                    Microsoft.Azure.Cosmos.FeedResponse<Movie> response = await resultSetIterator.ReadNextAsync();
+                    Microsoft.Azure.Cosmos.FeedResponse<Category> response = await resultSetIterator.ReadNextAsync();
+                    requestCharge = requestCharge + response.RequestCharge;
                     results.AddRange(response);
                 }
             }
-            return results;
+
+            var qr = new QueryResult<IEnumerable<Category>>(results, requestCharge);
+            return qr;
         }
 
-        public async Task<Movie> GetById(string id)
+        public async Task<QueryResult<Movie>> GetById(string id)
         {
             var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
             var result = await container.ReadItemAsync<Movie>(id, new PartitionKey(id));
-            return result;
+
+            var qr = new QueryResult<Movie>(result, result.RequestCharge);
+            return qr;
         }
     }
 }
