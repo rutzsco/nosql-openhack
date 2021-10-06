@@ -21,6 +21,44 @@ namespace Demo.Function.Movies.Api.Data
         {
             _cosmosClient = cosmosClient;
         }
+        //SELECT top 10 c.ItemId from c order by c.Popularity desc
+        public async Task<QueryResult<IEnumerable<Movie>>> GetTopByPopularity()
+        {
+            var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
+            QueryDefinition query = new QueryDefinition("SELECT top 10 * from c order by c.Popularity desc");
+            List<Movie> results = new List<Movie>();
+            double requestCharge = 0;
+            using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query))
+            {
+                while (resultSetIterator.HasMoreResults)
+                {
+                    Microsoft.Azure.Cosmos.FeedResponse<Movie> response = await resultSetIterator.ReadNextAsync();
+                    requestCharge = requestCharge + response.RequestCharge;
+                    results.AddRange(response);
+                }
+            }
+            var qr = new QueryResult<IEnumerable<Movie>>(results, requestCharge);
+            return qr;
+        }
+
+        public async Task<QueryResult<IEnumerable<Movie>>> GetTopByReleaseDate()
+        {
+            var container = this._cosmosClient.GetContainer(DatabaseName, "Item");
+            QueryDefinition query = new QueryDefinition("SELECT top 10 * from c order by c.ReleaseDate desc");
+            List<Movie> results = new List<Movie>();
+            double requestCharge = 0;
+            using (FeedIterator<Movie> resultSetIterator = container.GetItemQueryIterator<Movie>(query))
+            {
+                while (resultSetIterator.HasMoreResults)
+                {
+                    Microsoft.Azure.Cosmos.FeedResponse<Movie> response = await resultSetIterator.ReadNextAsync();
+                    requestCharge = requestCharge + response.RequestCharge;
+                    results.AddRange(response);
+                }
+            }
+            var qr = new QueryResult<IEnumerable<Movie>>(results, requestCharge);
+            return qr;
+        }
 
         public async Task<QueryResult<IEnumerable<Movie>>> GetAll()
         {
@@ -80,6 +118,25 @@ namespace Demo.Function.Movies.Api.Data
 
             var qr = new QueryResult<IEnumerable<Category>>(results, requestCharge);
             return qr;
+        }
+
+
+        public async Task<double> CreateCartItem(string itemId, string cartId)
+        {
+            var id = Guid.NewGuid().ToString();
+            var ci = new 
+            { 
+                id = id,
+                CartItemId = id,
+                CartId = cartId,
+                ItemId = itemId,
+                Quantity = 1,
+                DateCreated = DateTime.UtcNow
+            };
+            var container = this._cosmosClient.GetContainer(DatabaseName, "CartItem");
+            var response = await container.CreateItemAsync(ci, new PartitionKey(id));
+
+            return response.RequestCharge;
         }
 
         public async Task<QueryResult<Movie>> GetById(string id)

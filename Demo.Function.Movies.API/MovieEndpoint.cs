@@ -28,7 +28,18 @@ namespace Demo.Function.Movies.API
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             var queryService = new MovieQueryService(_cosmosClient);
-            var listing = await queryService.GetAll();
+            var listing = await queryService.GetTopByPopularity();
+
+            return new OkObjectResult(listing);
+        }
+
+        [FunctionName("MovieGetRecentEndpoint")]
+        public async Task<IActionResult> GetRecent([HttpTrigger(AuthorizationLevel.Function, "get", Route = "recommendations/recent")] HttpRequest req, ILogger log, ExecutionContext context)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var queryService = new MovieQueryService(_cosmosClient);
+            var listing = await queryService.GetTopByReleaseDate();
 
             return new OkObjectResult(listing);
         }
@@ -75,6 +86,17 @@ namespace Demo.Function.Movies.API
             var listing = await queryService.GetById(id);
 
             return new OkObjectResult(listing);
+        }
+
+        [FunctionName("CreateCartItemEndpoint")]
+        public async Task<IActionResult> CreateCartItem([HttpTrigger(AuthorizationLevel.Function, "get", Route = "cart/{id}/item/{itemId}")] HttpRequest req, string id, string itemId, ILogger log, ExecutionContext context)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var queryService = new MovieQueryService(_cosmosClient);
+            var r = await queryService.CreateCartItem(id, itemId);
+
+            return new OkObjectResult(r);
         }
     }
 }
