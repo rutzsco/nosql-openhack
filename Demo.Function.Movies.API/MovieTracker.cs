@@ -19,12 +19,11 @@ namespace Demo.Function.Movies.API
     [JsonObject(MemberSerialization.OptIn)]
     public class MovieTracker
     {
-        private readonly ILogger _Logger;
         private CosmosClient _cosmosClient;
 
-        public MovieTracker(CosmosClient cosmosClient, ILogger logger)
+        public MovieTracker(CosmosClient cosmosClient)
         {
-            _Logger = logger;
+            _cosmosClient = cosmosClient;
         }
 
         [JsonProperty("buyCount")]
@@ -32,7 +31,6 @@ namespace Demo.Function.Movies.API
 
         public void ProcessNewOrderDetail(OrderDetail order)
         {
-            _Logger.LogInformation($"ProcessNewOrder - Begin Processing. Id {order.ProductId}");
             BuyCount = BuyCount + Convert.ToInt32(order.Quantity);
 
             var m = new
@@ -64,7 +62,7 @@ namespace Demo.Function.Movies.API
         }
 
         [FunctionName("MovieTracker5")]
-        public static Task Run([EntityTrigger] IDurableEntityContext ctx, ExecutionContext executionContext, ILogger logger)
-            => ctx.DispatchAsync<MovieTracker>(executionContext, logger);
+        public static Task Run([EntityTrigger] IDurableEntityContext ctx)
+            => ctx.DispatchAsync<MovieTracker>();
     }
 }

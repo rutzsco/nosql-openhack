@@ -7,6 +7,8 @@ using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using StackExchange.Redis;
+
 [assembly: FunctionsStartup(typeof(Demo.Function.Movies.API.Startup))]
 
 namespace Demo.Function.Movies.API
@@ -30,6 +32,12 @@ namespace Demo.Function.Movies.API
                 return configurationBuilder
                         .Build();
             });
+
+
+            builder.Services.AddSingleton<IConnectionMultiplexer>((s) => {
+                var r = ConnectionMultiplexer.Connect(configuration["RedisConnectionString"]);
+                return r;
+            });      
         }
     }
 }

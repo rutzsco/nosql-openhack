@@ -19,12 +19,10 @@ namespace Demo.Function.Movies.API
     [JsonObject(MemberSerialization.OptIn)]
     public class CategoryTracker
     {
-        private readonly ILogger _Logger;
         private CosmosClient _cosmosClient;
 
-        public CategoryTracker(CosmosClient cosmosClient, ILogger logger)
+        public CategoryTracker(CosmosClient cosmosClient)
         {
-            _Logger = logger;
             _cosmosClient = cosmosClient;
         }
 
@@ -33,7 +31,6 @@ namespace Demo.Function.Movies.API
 
         public void ProcessNewOrderDetail(OrderDetail order)
         {
-            _Logger.LogInformation($"ProcessNewOrder - Begin Processing. Id {order.CategoryId}");
             BuyCount = BuyCount + Convert.ToInt32(order.Quantity);
 
             var container = _cosmosClient.GetContainer("MoviesDB", "MovieStatistics");
@@ -65,7 +62,7 @@ namespace Demo.Function.Movies.API
         }
 
         [FunctionName("CategoryTracker1")]
-        public static Task Run([EntityTrigger] IDurableEntityContext ctx, ExecutionContext executionContext, ILogger logger)
-            => ctx.DispatchAsync<CategoryTracker>(executionContext, logger);
+        public static Task Run([EntityTrigger] IDurableEntityContext ctx)
+            => ctx.DispatchAsync<CategoryTracker>();
     }
 }
