@@ -5,8 +5,10 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+using Demo.Function.Movies.Api.Data;
 using Demo.Function.Movies.API.Data;
 
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.WebJobs;
@@ -17,11 +19,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Demo.Function.Movies.API
 {
-    public static class AggregationProcessor
+    public class AggregationProcessor
     {
-        [FunctionName("AggregationProcessor")]
-        public static async Task Run([EventHubTrigger("telemetry", Connection = "IngestEventHubConnectionString", ConsumerGroup = "scrutz")] EventData[] events, [DurableClient] IDurableClient context, ILogger log)
+        private CosmosClient _cosmosClient;
+
+        public AggregationProcessor(CosmosClient cosmosClient)
         {
+            this._cosmosClient = cosmosClient;
+        }
+
+        [FunctionName("AggregationProcessor")]
+        public async Task Run([EventHubTrigger("telemetry", Connection = "IngestEventHubConnectionString", ConsumerGroup = "scrutz")] EventData[] events, [DurableClient] IDurableClient context, ILogger log)
+        {         
             foreach (EventData eventData in events)
             {
                 var messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
@@ -31,8 +40,17 @@ namespace Demo.Function.Movies.API
                 {
                     orderDetail.OrderDate = order.OrderDate;
 
-                    var entityId = new EntityId("MovieTracker3", $"{Convert.ToString(orderDetail.ProductId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}-{orderDetail.OrderDate.Hour}");
-                    await context.SignalEntityAsync(entityId, "ProcessNewOrderDetail", orderDetail);
+                    await context.SignalEntityAsync(new EntityId("MovieHourTracker", $"{Convert.ToString(orderDetail.ProductId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}-{orderDetail.OrderDate.Hour}"), "ProcessNewOrderDetail", orderDetail);
+                    await context.SignalEntityAsync(new EntityId("MovieTracker4", Convert.ToString(orderDetail.ProductId)), "ProcessNewOrderDetail", orderDetail);
+                    
+                    var queryService = new MovieQueryService(_cosmosClient);
+                    var item = await queryService.GetById(Convert.ToString(orderDetail.ProductId));
+
+                    orderDetail.CategoryId = item.Result.CategoryId;
+                    await context.SignalEntityAsync(new EntityId("CategoryTracker", orderDetail.CategoryId), "ProcessNewOrderDetail", orderDetail);
+
+                    orderDetail.AggregationId = $"{Convert.ToString(orderDetail.CategoryId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}";
+                    await context.SignalEntityAsync(new EntityId("CategoryDayTracker", orderDetail.AggregationId), "ProcessNewOrderDetail", orderDetail);
                 }
             }
         }

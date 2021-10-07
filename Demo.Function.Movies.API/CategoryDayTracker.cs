@@ -17,14 +17,15 @@ using Newtonsoft.Json;
 namespace Demo.Function.Movies.API
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class MovieTracker
+    public class CategoryDayTracker
     {
         private readonly ILogger _Logger;
         private CosmosClient _cosmosClient;
 
-        public MovieTracker(CosmosClient cosmosClient, ILogger logger)
+        public CategoryDayTracker(CosmosClient cosmosClient, ILogger logger)
         {
             _Logger = logger;
+            _cosmosClient = cosmosClient;
         }
 
         [JsonProperty("buyCount")]
@@ -32,19 +33,19 @@ namespace Demo.Function.Movies.API
 
         public void ProcessNewOrderDetail(OrderDetail order)
         {
-            _Logger.LogInformation($"ProcessNewOrder - Begin Processing. Id {order.ProductId}");
+            _Logger.LogInformation($"ProcessNewOrder - Begin Processing. Id {order.CategoryId}");
             BuyCount = BuyCount + Convert.ToInt32(order.Quantity);
 
-            var m = new
+            var c1 = new
             {
-                id = $"{Convert.ToString(order.ProductId)}-{order.OrderDate.Year}-{order.OrderDate.Month}-{order.OrderDate.Day}-{order.OrderDate.Hour}",
-                productId = Convert.ToString(order.ProductId),
+                id = order.AggregationId,
+                productId = order.CategoryId,
                 buyCount = BuyCount,
-                type = "ProductBuyCount",
+                type = "CategoryDayBuyCount",
                 dateTime = new DateTime(order.OrderDate.Year, order.OrderDate.Month, order.OrderDate.Day, order.OrderDate.Hour, 0, 0)
             };
             var container = _cosmosClient.GetContainer("MoviesDB", "MovieStatistics");
-            container.UpsertItemAsync(m, new PartitionKey(m.id)).Wait();
+            container.UpsertItemAsync(c1, new PartitionKey(c1.id)).Wait();
         }
 
         public Task Reset()
@@ -57,14 +58,13 @@ namespace Demo.Function.Movies.API
         {
             return Task.FromResult(this.BuyCount);
         }
-
         public void Delete()
         {
             Entity.Current.DeleteState();
         }
 
-        [FunctionName("MovieTracker4")]
+        [FunctionName("CategoryDayTracker")]
         public static Task Run([EntityTrigger] IDurableEntityContext ctx, ExecutionContext executionContext, ILogger logger)
-            => ctx.DispatchAsync<MovieTracker>(executionContext, logger);
+            => ctx.DispatchAsync<CategoryDayTracker>(executionContext, logger);
     }
 }

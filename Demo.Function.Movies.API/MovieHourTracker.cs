@@ -17,14 +17,15 @@ using Newtonsoft.Json;
 namespace Demo.Function.Movies.API
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class MovieTracker
+    public class MovieHourTracker
     {
         private readonly ILogger _Logger;
         private CosmosClient _cosmosClient;
 
-        public MovieTracker(CosmosClient cosmosClient, ILogger logger)
+        public MovieHourTracker(CosmosClient cosmosClient, ILogger logger)
         {
             _Logger = logger;
+            _cosmosClient = cosmosClient;
         }
 
         [JsonProperty("buyCount")]
@@ -40,7 +41,7 @@ namespace Demo.Function.Movies.API
                 id = $"{Convert.ToString(order.ProductId)}-{order.OrderDate.Year}-{order.OrderDate.Month}-{order.OrderDate.Day}-{order.OrderDate.Hour}",
                 productId = Convert.ToString(order.ProductId),
                 buyCount = BuyCount,
-                type = "ProductBuyCount",
+                type = "ProductHourBuyCount",
                 dateTime = new DateTime(order.OrderDate.Year, order.OrderDate.Month, order.OrderDate.Day, order.OrderDate.Hour, 0, 0)
             };
             var container = _cosmosClient.GetContainer("MoviesDB", "MovieStatistics");
@@ -63,8 +64,8 @@ namespace Demo.Function.Movies.API
             Entity.Current.DeleteState();
         }
 
-        [FunctionName("MovieTracker4")]
+        [FunctionName("MovieHourTracker")]
         public static Task Run([EntityTrigger] IDurableEntityContext ctx, ExecutionContext executionContext, ILogger logger)
-            => ctx.DispatchAsync<MovieTracker>(executionContext, logger);
+            => ctx.DispatchAsync<MovieHourTracker>(executionContext, logger);
     }
 }

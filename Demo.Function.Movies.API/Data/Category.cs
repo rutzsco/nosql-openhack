@@ -11,6 +11,8 @@ namespace Demo.Function.Movies.API.Data
         public string ProductName { get; set; }
 
         public string Description { get; set; }
+
+        public string CategoryId { get; set; }
     }
 
     public class Order
@@ -48,5 +50,8 @@ namespace Demo.Function.Movies.API.Data
 
         public DateTime OrderDate { get; set; }
 
+        public string CategoryId { get; set; }
+
+        public string AggregationId { get; set; }
     }
 }
