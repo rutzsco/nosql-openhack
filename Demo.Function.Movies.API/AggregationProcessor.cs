@@ -31,28 +31,10 @@ namespace Demo.Function.Movies.API
                 {
                     orderDetail.OrderDate = order.OrderDate;
 
-
                     var entityId = new EntityId("MovieTracker3", $"{Convert.ToString(orderDetail.ProductId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}-{orderDetail.OrderDate.Hour}");
                     await context.SignalEntityAsync(entityId, "ProcessNewOrderDetail", orderDetail);
                 }
             }
         }
-      
-        //[FunctionName("AggregationProcessor")]
-        //public static async Task Run([CosmosDBTrigger(databaseName: "MoviesDB", collectionName: "TBD", ConnectionStringSetting = "", LeaseCollectionName = "leases")]IReadOnlyList<Document> input, [DurableClient] IDurableClient context, ILogger log)
-        //{
-        //    if (input != null && input.Count > 0)
-        //    {
-        //        foreach (var document in input)
-        //        {
-        //            var order = JsonConvert.DeserializeObject<Order>(document.ToString());
-        //            var entityId = new EntityId("MovieTracker", order.id.ToString());
-        //            foreach (var orderDetail in order.)
-        //            {
-        //                await context.SignalEntityAsync(entityId, "ProcessNewOrderDetail", orderDetail);
-        //            }
-        //        }
-        //    }
-        //}
     }
 }
