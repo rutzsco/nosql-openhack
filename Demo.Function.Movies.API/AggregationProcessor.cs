@@ -40,17 +40,17 @@ namespace Demo.Function.Movies.API
                 {
                     orderDetail.OrderDate = order.OrderDate;
 
-                    await context.SignalEntityAsync(new EntityId("MovieHourTracker", $"{Convert.ToString(orderDetail.ProductId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}-{orderDetail.OrderDate.Hour}"), "ProcessNewOrderDetail", orderDetail);
-                    await context.SignalEntityAsync(new EntityId("MovieTracker4", Convert.ToString(orderDetail.ProductId)), "ProcessNewOrderDetail", orderDetail);
+                    await context.SignalEntityAsync(new EntityId("MovieHourTracker1", $"{Convert.ToString(orderDetail.ProductId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}-{orderDetail.OrderDate.Hour}"), "ProcessNewOrderDetail", orderDetail);
+                    await context.SignalEntityAsync(new EntityId("MovieTracker5", Convert.ToString(orderDetail.ProductId)), "ProcessNewOrderDetail", orderDetail);
                     
                     var queryService = new MovieQueryService(_cosmosClient);
                     var item = await queryService.GetById(Convert.ToString(orderDetail.ProductId));
 
                     orderDetail.CategoryId = item.Result.CategoryId;
-                    await context.SignalEntityAsync(new EntityId("CategoryTracker", orderDetail.CategoryId), "ProcessNewOrderDetail", orderDetail);
+                    await context.SignalEntityAsync(new EntityId("CategoryTracker1", orderDetail.CategoryId), "ProcessNewOrderDetail", orderDetail);
 
                     orderDetail.AggregationId = $"{Convert.ToString(orderDetail.CategoryId)}-{orderDetail.OrderDate.Year}-{orderDetail.OrderDate.Month}-{orderDetail.OrderDate.Day}";
-                    await context.SignalEntityAsync(new EntityId("CategoryDayTracker", orderDetail.AggregationId), "ProcessNewOrderDetail", orderDetail);
+                    await context.SignalEntityAsync(new EntityId("CategoryDayTracker1", orderDetail.AggregationId), "ProcessNewOrderDetail", orderDetail);
                 }
             }
         }

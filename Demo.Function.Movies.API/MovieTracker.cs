@@ -63,7 +63,7 @@ namespace Demo.Function.Movies.API
             Entity.Current.DeleteState();
         }
 
-        [FunctionName("MovieTracker4")]
+        [FunctionName("MovieTracker5")]
         public static Task Run([EntityTrigger] IDurableEntityContext ctx, ExecutionContext executionContext, ILogger logger)
             => ctx.DispatchAsync<MovieTracker>(executionContext, logger);
     }
