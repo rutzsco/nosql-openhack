@@ -19,14 +19,11 @@ namespace Demo.Function.Movies.API
     [JsonObject(MemberSerialization.OptIn)]
     public class MovieTracker
     {
-        private readonly ExecutionContext _ExecutionContext;
-        private static readonly HttpClient _httpClient = new HttpClient();
         private readonly ILogger _Logger;
         private CosmosClient _cosmosClient;
 
-        public MovieTracker(ExecutionContext executionContext, CosmosClient cosmosClient, ILogger logger)
+        public MovieTracker(CosmosClient cosmosClient, ILogger logger)
         {
-            _ExecutionContext = executionContext;
             _Logger = logger;
             _cosmosClient = cosmosClient;
         }
